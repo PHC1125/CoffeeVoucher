@@ -17,7 +17,7 @@
         h2 {
             color: #333;
             text-align: center;
-            font-size: 26px;
+            font-size: 24px;
         }
         .subtitle {
             font-size: 21px;
@@ -45,7 +45,7 @@
         }
         button {
             padding: 10px 20px;
-            background-color: #003366;
+            background-color: #003366; /* Updated color */
             color: white;
             border: none;
             border-radius: 4px;
@@ -53,7 +53,7 @@
             font-size: 16px;
         }
         button:hover {
-            background-color: #003366;
+            background-color: #002244; /* Darker shade for hover effect */
         }
         table {
             width: 80%;
@@ -65,43 +65,46 @@
             text-align: left;
         }
         th {
-            background-color: #003366;
+            background-color: #003366; /* Updated color */
             color: white;
         }
         .popup {
             padding: 10px;
-            background-color: #ffffff97;
+            background-color: #fff;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            border: 3px solid #337ab7;
+            border: 3px solid #003366; /* Updated color */
             display: none;
             font-size: 16px;
             text-align: center;
             width: 80%;
-            margin: 10px 0; /* spacing between elements */
+            margin: 10px 0;
         }
         .counter {
             margin-top: 20px;
             font-size: 20px;
-            color: #337ab7;
+            color: #003366; /* Updated color */
         }
     </style>
 </head>
 <body>
-    <h2>Robotic Barista Coffee Voucher Redemption Record System</h2>
-    <div class="subtitle">Center for Engineering Education Innovation, HKUST</div>
+    <h2>Coffee Voucher Redemption Record System</h2>
+    <div class="subtitle">Center for Engineering Education Innovation</div>
+    <div class="subtitle">Prototype Version 22</div>
     <div class="input-area">
-        <input type="text" id="inputString" placeholder="Enter Code/ Scan Barcode" onkeypress="handleKeyPress(event)">
+        <input type="text" id="inputString" placeholder="Enter a voucher code" onkeypress="handleKeyPress(event)">
         <button onclick="addEntry()">Redeem</button>
     </div>
 
-    <div class="popup" id="popupMessage"></div> <!-- Moved popup here -->
+    <div class="popup" id="popupMessage"></div>
 
     <div class="checkbox-area">
         <input type="checkbox" id="hideInvalidCheckBox" onclick="toggleInvalidEntries()">
         <label for="hideInvalidCheckBox">Hide Invalid Entries</label>
         <input type="checkbox" id="disablePopupCheckBox">
         <label for="disablePopupCheckBox">Disable Popups</label>
+        <input type="checkbox" id="toggleTableVisibility" onclick="toggleTableVisibility()">
+        <label for="toggleTableVisibility">Hide Records Table</label>
     </div>
     
     <table id="entriesTable">
@@ -109,7 +112,7 @@
             <tr>
                 <th>Voucher Code</th>
                 <th>Timestamp</th>
-                <th>Validation from database</th>
+                <th>Validation</th>
             </tr>
         </thead>
         <tbody>
@@ -152,7 +155,7 @@
 
             if (entries.has(value)) {
                 cell3.textContent = 'Duplicate';
-                message = 'Voucher Already Redeemed';
+                message = 'Voucher Already Used';
                 isInvalid = true;
             } else {
                 entries.add(value);
@@ -163,7 +166,7 @@
                     updateValidCounter();
                 } else {
                     cell3.textContent = 'Invalid';
-                    message = 'Invalid Voucher - Please Try Again';
+                    message = 'Invalid Voucher';
                     isInvalid = true;
                 }
             }
@@ -202,6 +205,11 @@
             } else {
                 invalidEntries.forEach(entry => entry.style.display = '');
             }
+        }
+
+        function toggleTableVisibility() {
+            const table = document.getElementById('entriesTable');
+            table.style.display = table.style.display === 'none' ? '' : 'none';
         }
     </script>
 </body>
