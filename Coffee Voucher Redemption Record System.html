@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Voucher Redemption Record System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            font-size: 24px;
+        }
+        .subtitle {
+            font-size: 21px;
+            color: #555;
+            text-align: center;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .input-area, .checkbox-area {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        input[type="text"], input[type="checkbox"] {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #003366;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #003366;
+        }
+        table {
+            width: 80%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #003366;
+            color: white;
+        }
+        .popup {
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 3px solid #337ab7;
+            display: none;
+            font-size: 16px;
+            text-align: center;
+            width: 80%;
+            margin: 10px 0; /* spacing between elements */
+        }
+        .counter {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #337ab7;
+        }
+    </style>
+</head>
+<body>
+    <h2>Robotic Barista Coffee Voucher Redemption Record System</h2>
+    <div class="subtitle">Center for Engineering Education Innovation, HKUST</div>
+    <div class="input-area">
+        <input type="text" id="inputString" placeholder="Enter a voucher code" onkeypress="handleKeyPress(event)">
+        <button onclick="addEntry()">Redeem</button>
+    </div>
+
+    <div class="popup" id="popupMessage"></div> <!-- Moved popup here -->
+
+    <div class="checkbox-area">
+        <input type="checkbox" id="hideInvalidCheckBox" onclick="toggleInvalidEntries()">
+        <label for="hideInvalidCheckBox">Hide Invalid Entries</label>
+        <input type="checkbox" id="disablePopupCheckBox">
+        <label for="disablePopupCheckBox">Disable Popups</label>
+    </div>
+    
+    <table id="entriesTable">
+        <thead>
+            <tr>
+                <th>Voucher Code</th>
+                <th>Timestamp</th>
+                <th>Validation</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    
+    <div class="counter" id="validCounter">Vouchers Redeemed: 0</div>
+
+    <script>
+        const entries = new Set();
+        const tableBody = document.querySelector('#entriesTable tbody');
+        const popup = document.getElementById('popupMessage');
+        let validCount = 0;
+
+        function updateValidCounter() {
+            const counter = document.getElementById('validCounter');
+            counter.textContent = `Vouchers Redeemed: ${validCount}`;
+        }
+
+        function addEntry() {
+            const input = document.getElementById('inputString');
+            const value = input.value.trim();
+            let message = '';
+            let isInvalid = false;
+
+            if (value === '') {
+                return; // Avoid adding empty strings
+            }
+
+            const row = tableBody.insertRow();
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+            const cell3 = row.insertCell(2); // Validation status
+
+            const date = new Date();
+            const timestamp = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+            
+            cell1.textContent = value;
+            cell2.textContent = timestamp;
+
+            if (entries.has(value)) {
+                cell3.textContent = 'Duplicate';
+                message = 'Voucher Already Used';
+                isInvalid = true;
+            } else {
+                entries.add(value);
+                if (value.startsWith('ID')) {
+                    cell3.textContent = 'Valid';
+                    message = 'Valid Voucher - Coffee Redeemed';
+                    validCount++;
+                    updateValidCounter();
+                } else {
+                    cell3.textContent = 'Invalid';
+                    message = 'Invalid Voucher';
+                    isInvalid = true;
+                }
+            }
+
+            if (isInvalid) {
+                row.classList.add('invalid');
+            }
+
+            showPopup(message);
+            input.value = ''; // Clear the input field
+        }
+
+        function showPopup(message) {
+            if (!document.getElementById('disablePopupCheckBox').checked) {
+                popup.textContent = message;
+                popup.style.display = 'block';
+                setTimeout(function() {
+                    popup.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent form submission
+                addEntry();
+            }
+        }
+
+        function toggleInvalidEntries() {
+            const checkbox = document.getElementById('hideInvalidCheckBox');
+            const invalidEntries = document.querySelectorAll('.invalid');
+
+            if (checkbox.checked) {
+                invalidEntries.forEach(entry => entry.style.display = 'none');
+            } else {
+                invalidEntries.forEach(entry => entry.style.display = '');
+            }
+        }
+    </script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+</body>
+</html>
